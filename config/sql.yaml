@@ -1,0 +1,12 @@
+getOrderBook:
+    SELECT 
+        price,
+        volume,
+        side,
+        timestamp
+    FROM
+        order_book
+    WHERE
+        pair = '{}'
+    AND
+        timestamp between {} and {}
