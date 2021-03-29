@@ -19,8 +19,8 @@ class binance():
                     self.getStats(pair)
                     self.getOrderBook(pair)
                 print("data gathering completed")
-                #run once every 24 hours
-                time.sleep(60*60*24)
+                #run once every 12 hours
+                time.sleep(60*60*12)
         except KeyboardInterrupt:
             print("data capture exited succesfully!")
         

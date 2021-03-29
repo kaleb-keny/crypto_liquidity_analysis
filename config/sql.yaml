@@ -10,3 +10,76 @@ getOrderBook:
         pair = '{}'
     AND
         timestamp between {} and {}
+        
+getPairStats:
+    SELECT 
+        sub.pair,
+        avg(sub.totalVolume) as avgDailyVolume
+    FROM
+        (SELECT
+            timestamp,
+            pair,
+            weightedAvgPrice*volume as totalVolume
+        FROM
+            pair_statistics
+        WHERE
+            timestamp BETWEEN {} AND {}
+        AND
+            pair in ({})
+        GROUP BY
+            pair,
+            timestamp) sub
+    GROUP BY
+        pair;
+        
+        
+getBidAskSpread:
+    SELECT 
+        sub.pair,
+        avg(sub.spread) as bidAskSpread
+    FROM
+        (    
+        SELECT
+            bids.timestamp,
+            bids.pair,
+            10000 * 2 * (bestAsk - bestBid) / (bestAsk + bestBid)  as spread
+        FROM
+                (SELECT
+                    timestamp,
+                    pair,
+                    min(price) as bestASk
+                FROM
+                    order_book
+                WHERE
+                    side = 'asks'
+                AND
+                    timestamp BETWEEN {} AND {}
+                AND
+                    pair in ({})
+                GROUP BY
+                    timestamp,
+                    pair) asks
+            INNER JOIN
+                (SELECT
+                    timestamp,
+                    pair,
+                    max(price) as bestBid
+                FROM
+                    order_book
+                WHERE
+                    side = 'bids'
+                AND
+                    timestamp BETWEEN {} AND {}
+                AND
+                    pair in ({})
+                GROUP BY
+                    timestamp,
+                    pair) bids
+            ON
+                asks.timestamp = bids.timestamp
+            AND
+                asks.pair = bids.pair) sub
+                                                
+    GROUP BY
+        pair;
+    

@@ -12,26 +12,45 @@ class processData():
         self.factorList.extend(range(200,1200,200))
         
         #Bid/Ask specific functions
-        self.bidAskSpec = {'bids':{'bestPrice':min,
-                                   'manipulationFactor':1},
-                           'asks':{'bestPrice':max,
-                                   'manipulationFactor':-1}}
-                
-    
+        self.bidAskSpec = {'bids':{'bestPrice':max,
+                                   'manipulationFactor':-1},
+                           'asks':{'bestPrice':min,
+                                   'manipulationFactor':+1}}
+                    
     def generateOutput(self,startDate,endDate,pairList):
 
-        self.startTime = getTimestampFromString(startDate)
-        self.endTime   = getTimestampFromString(endDate)
-            
-    def orderBookStats(self,pairList):
+        startTime = getTimestampFromString(startDate)
+        endTime   = getTimestampFromString(endDate)
+        #TO DO
         
-        finalResults = pd.DataFrame()
+        
+    def getBidAskSpread(self,pairList,startTime,endTime):
+        pairString = ''
+        for pair in pairList:
+            pairString = pairString + ",'" +pair + "'"
+
+        df = self.getTableFromSQL(self.sqlConf["getBidAskSpread"].format(
+                                                                         startTime,
+                                                                         endTime,
+                                                                         pairString[1:],
+                                                                         startTime,
+                                                                         endTime,
+                                                                         pairString[1:]
+                                                                         ))
+        return df
+        
+        
+                
+    def getOrderBookStats(self,pairList,startTime,endTime):
+        
+        orderBookResults = pd.DataFrame()
         
         for pair in pairList:
+            
             #get orderbook
             df = self.getTableFromSQL(self.sqlConf["getOrderBook"].format(pair,
-                                                                          self.startTime,
-                                                                          self.endTime))
+                                                                          startTime,
+                                                                          endTime))
             df["pxv"] = df["price"].multiply(df["volume"])
             
             #loop on bid/ask
@@ -71,10 +90,21 @@ class processData():
                     tempResults = pd.DataFrame({'side':side,'factor':factor,'pair':pair,'stats':stats})
                     
                     #Save the results
-                    finalResults = pd.concat([tempResults,finalResults],axis=0)
+                    orderBookResults = pd.concat([tempResults,orderBookResults],axis=0)
             
-        return finalResults
+        return orderBookResults
         
+    def getPairStats(self,pairList,startTime,endTime):
+        pairString = ''
+        for pair in pairList:
+            pairString = pairString + ",'" +pair + "'"
+
+        df = self.getTableFromSQL(self.sqlConf["getPairStats"].format(startTime,
+                                                                      endTime,
+                                                                      pairString[1:]))
+        
+        return df
+    
     def getTableFromSQL(self,sql):
         with getMYSQLConnection(self.conf) as con:
             return pd.read_sql(sql,con)
