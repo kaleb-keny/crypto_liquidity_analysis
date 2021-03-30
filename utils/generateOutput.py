@@ -17,11 +17,41 @@ class processData():
                            'asks':{'bestPrice':min,
                                    'manipulationFactor':+1}}
                     
-    def generateOutput(self,startDate,endDate,pairList):
+    def generateOutput(self,pairList,startDate,endDate):
 
         startTime = getTimestampFromString(startDate)
         endTime   = getTimestampFromString(endDate)
-        #TO DO
+        
+        #Get Order book stats
+        dailyTurnover = self.getPairStats(pairList=pairList,
+                                          startTime=startTime, 
+                                          endTime=endTime)
+        
+        #dump to csv
+        dailyTurnover.to_csv(r"output/dailyTurnover.csv")
+        
+        #Get bid ask spread
+        bidAskSpread = self.getBidAskSpread(pairList=pairList, 
+                                            startTime=startTime, 
+                                            endTime=endTime)
+
+        #dump to csv
+        bidAskSpread.to_csv(r"output/bidAskSpread.csv")
+        
+        #Get order book slippage  stats
+        orderBookStats = self.getOrderBookStats(pairList=pairList, 
+                                                startTime=startTime, 
+                                                endTime=endTime)
+        
+        #convert to pivot table
+        pivot = pd.pivot_table(data=orderBookStats,
+                               values=['stats'],
+                               index=['pair','side','index'],
+                               columns='factor',
+                               aggfunc='mean',
+                               fill_value=0)
+        #Save as pivot table
+        pivot.to_csv(r"output/orderBookStats.csv")  
         
         
     def getBidAskSpread(self,pairList,startTime,endTime):
@@ -38,8 +68,7 @@ class processData():
                                                                          pairString[1:]
                                                                          ))
         return df
-        
-        
+            
                 
     def getOrderBookStats(self,pairList,startTime,endTime):
         
@@ -92,6 +121,8 @@ class processData():
                     #Save the results
                     orderBookResults = pd.concat([tempResults,orderBookResults],axis=0)
             
+        orderBookResults.reset_index(inplace=True,drop=False)
+
         return orderBookResults
         
     def getPairStats(self,pairList,startTime,endTime):

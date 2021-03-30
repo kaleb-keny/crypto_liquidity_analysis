@@ -2,6 +2,7 @@ import argparse
 from argparse import RawTextHelpFormatter
 from utils.binanceClient import binance
 from utils.mailSender import mailClass
+from utils.generateOutput import processData
 import utils.dbManager as db
 from utils.utility import parse_config
 
@@ -66,7 +67,18 @@ if __name__ == '__main__':
         bi.gatherData(args.t)
     
     elif args.r == 'output':
-        print("doing output")
+
+        if not (args.t and args.d):
+            parser.error('''Need to specify the tickers and date bounds''')
+
+        output = processData(conf=conf,
+                             sqlConf=sqlConf)
+        output.generateOutput(pairList=args.t, 
+                              startDate=args.d[0], 
+                              endDate=args.d[1])
+        
+        print("Output files saved under the output folder")
+        
 
     elif args.r == 'mail':
         if not (args.m):
