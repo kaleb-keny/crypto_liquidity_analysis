@@ -14,7 +14,15 @@ if __name__ == '__main__':
 
     description = \
     '''
-     TO DO 
+     To create database:
+         python main.py -r init
+     
+     To start gathering data on a given binance pair
+         python main.py -r data --t ETHUSDT BTCUSDT
+    
+    To Generate the output files in a given date range
+         python main.py -r output --t ETHUSDT BTCUSDT --d 01-mar-2021 15-mar-2021    
+      
     '''
     
     parser = argparse.ArgumentParser(description=description,formatter_class=RawTextHelpFormatter)

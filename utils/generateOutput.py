@@ -7,9 +7,9 @@ class processData():
         self.sqlConf = sqlConf
         
         #bucket ranges in bp
-        self.factorList = list(range(10,110,10))
+        self.factorList = list(range(25,110,25))
         self.factorList.extend([150,200])
-        self.factorList.extend(range(200,1200,200))
+        self.factorList.extend(range(400,1200,200))
         
         #Bid/Ask specific functions
         self.bidAskSpec = {'bids':{'bestPrice':max,
@@ -34,7 +34,6 @@ class processData():
         bidAskSpread = self.getBidAskSpread(pairList=pairList, 
                                             startTime=startTime, 
                                             endTime=endTime)
-
         #dump to csv
         bidAskSpread.to_csv(r"output/bidAskSpread.csv")
         
@@ -46,7 +45,7 @@ class processData():
         #convert to pivot table
         pivot = pd.pivot_table(data=orderBookStats,
                                values=['stats'],
-                               index=['pair','side','index'],
+                               index=['pair','side','stat'],
                                columns='factor',
                                aggfunc='mean',
                                fill_value=0)
@@ -122,6 +121,7 @@ class processData():
                     orderBookResults = pd.concat([tempResults,orderBookResults],axis=0)
             
         orderBookResults.reset_index(inplace=True,drop=False)
+        orderBookResults.rename(columns={'index':'stat'},inplace=True)
 
         return orderBookResults
         
