@@ -31,7 +31,7 @@ if __name__ == '__main__':
                         "-run",
                         type=str,
                         required=True,
-                        choices=['init','populate','data','output'],
+                        choices=['init','populate','data','output','mail','import'],
                         help='''WIP''')
 
     parser.add_argument("--d",
