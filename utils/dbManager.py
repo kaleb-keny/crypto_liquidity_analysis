@@ -66,7 +66,7 @@ class dbManager():
                     pair VARCHAR(24),
                     timestamp INT(11) UNSIGNED,
                     weightedAvgPrice DECIMAL(30,20),
-                    volume DECIMAL(30,20),
+                    volume DECIMAL(50,20),
                      CONSTRAINT pk_p_stat PRIMARY KEY (pair,timestamp),
                      INDEX (pair,timestamp)
                      );
